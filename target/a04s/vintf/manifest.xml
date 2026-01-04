@@ -1,0 +1,125 @@
+<!--
+    Input:
+        device/samsung/universal3830/manifest_api31.xml
+        device/samsung/universal3830/manifest_media_c2_default.xml
+        vendor/samsung/system/security/skeymaster/common/configs/skeymint_v100_manifest.xml
+        vendor/samsung/system/security/skeymaster/common/configs/gatekeeper_manifest.xml
+        vendor/samsung/interfaces/miscpower/2.0/manifest.xml
+        vendor/samsung/interfaces/audio/manifest.xml
+        vendor/samsung/interfaces/tlc/ucm/2.0/manifest.xml
+        vendor/samsung/interfaces/gnss/manifest/manifest_gnss_2_1.xml
+        vendor/samsung/interfaces/gnss/manifest/manifest_isehgnss_2_1.xml
+-->
+<manifest version="7.0" type="device" target-level="6">
+    <hal format="hidl">
+        <name>android.hardware.audio</name>
+        <transport>hwbinder</transport>
+        <fqname>@6.0::IDevicesFactory/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.audio.effect</name>
+        <transport>hwbinder</transport>
+        <fqname>@6.0::IEffectsFactory/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.bluetooth</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IBluetoothHci/default</fqname>
+    </hal>
+    <hal format="hidl" override="true">
+        <name>android.hardware.gatekeeper</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IGatekeeper/default</fqname>
+    </hal>
+    <hal format="hidl" override="true">
+        <name>android.hardware.gnss</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.1::IGnss/default</fqname>
+        <fqname>@2.1::IGnss/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.graphics.allocator</name>
+        <transport>hwbinder</transport>
+        <fqname>@4.0::IAllocator/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.graphics.composer</name>
+        <transport>hwbinder</transport>
+        <fqname>@2.2::IComposer/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.graphics.mapper</name>
+        <transport arch="32+64">passthrough</transport>
+        <fqname>@4.0::IMapper/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.media.omx</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IOmx/default</fqname>
+        <fqname>@1.0::IOmxStore/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.renderscript</name>
+        <transport arch="32+64">passthrough</transport>
+        <fqname>@1.0::IDevice/default</fqname>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>android.hardware.security.keymint</name>
+        <fqname>IKeyMintDevice/default</fqname>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>android.hardware.security.secureclock</name>
+        <fqname>ISecureClock/default</fqname>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>android.hardware.security.sharedsecret</name>
+        <fqname>ISharedSecret/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>android.hardware.sensors</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::ISensors/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>vendor.samsung.hardware.audio</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::ISehDevicesFactory/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>vendor.samsung.hardware.bluetooth</name>
+        <transport>hwbinder</transport>
+        <fqname>@2.0::ISehBluetooth/default</fqname>
+    </hal>
+    <hal format="hidl" override="true">
+        <name>vendor.samsung.hardware.gnss</name>
+        <transport>hwbinder</transport>
+        <fqname>@2.1::ISehGnss/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.samsung.hardware.keymint</name>
+        <fqname>ISehKeyMintExtension/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.samsung.hardware.keymint</name>
+        <fqname>ISehKeyMintFactory/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>vendor.samsung.hardware.miscpower</name>
+        <transport>hwbinder</transport>
+        <fqname>@2.0::ISehMiscPower/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>vendor.samsung.hardware.tlc.ucm</name>
+        <transport>hwbinder</transport>
+        <fqname>@2.0::ISehUcm/default</fqname>
+    </hal>
+    <hal format="hidl">
+        <name>vendor.samsung_slsi.hardware.ExynosHWCServiceTW</name>
+        <transport>hwbinder</transport>
+        <fqname>@1.0::IExynosHWCServiceTW/default</fqname>
+    </hal>
+    <sepolicy>
+        <version>34.0</version>
+    </sepolicy>
+    <kernel target-level="6"/>
+</manifest>
