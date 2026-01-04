@@ -1,130 +1,94 @@
 #!/usr/bin/env bash
 
 # -----------------------------
-# Minimal Firmware Downloader
-# (Samloader removed)
+# Google Drive Firmware Downloader
+# (SAMLOADER tamamen kaldırıldı)
 # -----------------------------
 
 source "$SRC_DIR/scripts/utils/firmware_utils.sh" || exit 1
 source "$TOOLS_DIR/venv/bin/activate" || exit 1
 
-FORCE=false
-MODEL=""
-CSC=""
-LATEST_FIRMWARE=""
-ZIP_FILE=""
+# Sabit MODEL ve CSC
+MODEL="SM-A047F"
+CSC="TUR"
 
-# --- Google Drive direct firmware link ---
-DOWNLOAD_URL="https://drive.usercontent.google.com/download?id=1C9GtYTn1EZ4sQN7qfJeWN6gxDj_WbgY-&authuser=0"
+# Google Drive File ID
+FILE_ID="1C9GtYTn1EZ4sQN7qfJeWN6gxDj_WbgY-"
+DOWNLOAD_URL="https://drive.google.com/uc?export=download&id=${FILE_ID}"
 
-
-PRINT_USAGE() {
-    echo "Usage: download_fw [options] <MODEL> <CSC>"
-    echo " -f, --force  : Force download even if already exists"
-}
-
-if [ "$#" -lt 2 ]; then
-    PRINT_USAGE
-    exit 1
-fi
-
-# Parse args
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        -f|--force)
-            FORCE=true
-            ;;
-        *)
-            if [ -z "$MODEL" ]; then
-                MODEL="$1"
-            elif [ -z "$CSC" ]; then
-                CSC="$1"
-            else
-                echo "Unknown argument: $1"
-                exit 1
-            fi
-            ;;
-    esac
-    shift
-done
-
-if [ -z "$MODEL" ] || [ -z "$CSC" ]; then
-    PRINT_USAGE
-    exit 1
-fi
-
+# Çıktı klasörleri
 ODIN_PATH="$ODIN_DIR/${MODEL}_${CSC}"
 FW_PATH="$FW_DIR/${MODEL}_${CSC}"
 
 mkdir -p "$ODIN_PATH"
 mkdir -p "$FW_PATH"
 
-echo "- Firmware folder: $ODIN_PATH"
+echo "==================================="
+echo "   Firmware Downloader (Drive)"
+echo "==================================="
+echo "- Target Model: $MODEL"
+echo "- Target CSC:   $CSC"
+echo "- Odin Path:    $ODIN_PATH"
 
-# Dummy version tag since samloader is removed
-LATEST_FIRMWARE="DRIVE-LINK-FIRMWARE"
-
-# Skip if not forced and already downloaded
-if ! $FORCE && [ -f "$ODIN_PATH/.downloaded" ]; then
-    echo "! Firmware already downloaded (use -f to force)"
-    exit 0
-fi
+LATEST_FIRMWARE="DRIVE-FIRMWARE"
 
 echo "- Downloading firmware from Google Drive..."
-
 ZIP_FILE="$ODIN_PATH/firmware.zip"
 
-wget -q \
-    --show-progress \
-    "$DOWNLOAD_URL" \
-    -O "$ZIP_FILE"
+# Google Drive büyük dosya indirme fix
+wget --no-check-certificate \
+     "https://drive.google.com/uc?export=download&id=${FILE_ID}" \
+     -O "$ZIP_FILE" -q --show-progress
 
-if [ ! -f "$ZIP_FILE" ]; then
-    echo "! Download failed"
+if [ ! -s "$ZIP_FILE" ]; then
+    echo "! Download FAILED (file is empty)"
     exit 1
 fi
 
-echo "- Extracting firmware.zip..."
+# Google Drive bazen HTML döndürür, ZIP olmaz → kontrol
+if ! unzip -t "$ZIP_FILE" >/dev/null 2>&1; then
+    echo "! ERROR: File is not a valid ZIP."
+    echo "! Google Drive direkt HTML sayfası indirmiş."
+    echo "! Çözüm: 'confirm=' token'lı indirme gerekiyor."
+    exit 1
+fi
+
+echo "- Extracting firmware..."
 unzip -o "$ZIP_FILE" -d "$ODIN_PATH" || exit 1
 rm -f "$ZIP_FILE"
 
-# --- MD5 Verification ---
+echo "- Verifying extracted ODIN packages..."
+
 VERIFY_ODIN_PACKAGES() {
     local f FILE_NAME LENGTH STORED_HASH CALCULATED_HASH
 
     while IFS= read -r f; do
         FILE_NAME="$(basename "$f")"
-        echo "- Verifying $FILE_NAME..."
+        echo "  * Checking $FILE_NAME"
 
         FILE_NAME="${FILE_NAME%.md5}"
-
         LENGTH=$((32 + 2 + ${#FILE_NAME} + 1))
+
         STORED_HASH="$(tail -c "$LENGTH" "$f" | cut -d ' ' -f1)"
-
-        if [[ ${#STORED_HASH} != 32 ]]; then
-            echo "! Invalid or missing MD5 section"
-            exit 1
-        fi
-
         CALCULATED_HASH="$(head -c-"$LENGTH" "$f" | md5sum | cut -d ' ' -f1)"
 
         if [[ "$STORED_HASH" != "$CALCULATED_HASH" ]]; then
-            echo "! File is corrupted: $FILE_NAME"
+            echo "! MD5 FAILED: $FILE_NAME"
             exit 1
         fi
 
-        echo "  ✔ OK"
+        echo "    ✔ OK"
     done < <(find "$ODIN_PATH" -type f -name "*.md5")
 }
 
-echo "- Verifying extracted ODIN packages..."
 VERIFY_ODIN_PACKAGES || exit 1
-
 
 echo "$LATEST_FIRMWARE" > "$ODIN_PATH/.downloaded"
 
-echo "✔ Firmware ready in:"
-echo "  $ODIN_PATH"
+echo "==================================="
+echo "✔ Firmware ready!"
+echo "→ $ODIN_PATH"
+echo "==================================="
 
 deactivate
 exit 0
