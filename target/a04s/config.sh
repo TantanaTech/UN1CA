@@ -13,6 +13,7 @@ TARGET_FIRMWARE="SM-A047F/TUR/A047FXXS9EXL1"
 TARGET_EXTRA_FIRMWARES=()
 TARGET_PLATFORM_SDK_VERSION=34
 TARGET_PRODUCT_SHIPPING_API_LEVEL=31
+TARGET_OS_SINGLE_SYSTEM_IMAGE=true
 
 # Dynamic partitions (A04s için yaklaşık değerler)
 # A04s'in super bölümü A52s'ten küçüktür, bu değerler hayati önem taşır.
