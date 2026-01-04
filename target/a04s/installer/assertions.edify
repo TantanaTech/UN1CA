@@ -1,0 +1,2 @@
+is_substring("A047FXX", getprop("ro.boot.bootloader")) && verify_no_downgrade(getprop("ro.boot.bootloader"), "A047FXXSCEYI1") && abort("E3003: Bu paket en az Android 14 (EYI1) firmware gerektirir.");
+is_substring("A047F", getprop("ro.boot.bootloader")) || abort("E3004: Bu paket sadece Galaxy A04s (A047F) cihazı içindir.");
