@@ -1,0 +1,41 @@
+name: Build OneUI7 Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3 python3-pip unzip
+
+      - name: Install Samsung Firmware Downloader
+        run: |
+          pip install samloader
+
+      - name: Download Firmware
+        run: |
+          MODEL="SM-A047F"
+          CSC="TUR"
+
+          samloader checkupdate $MODEL $CSC > fw.txt
+          VERSION=$(awk '{print $2}' fw.txt)
+          echo "FW VERSION = $VERSION"
+
+          samloader download -m $MODEL -r $CSC -v $VERSION -O firmware.zip
+          echo "Firmware downloaded!"
+
+      - name: Extract firmware
+        run: |
+          unzip firmware.zip -d firmware
+
+      - name: Done
+        run: echo "Build tamamlandı!"
+        
