@@ -54,9 +54,9 @@ jobs:
           ./scripts/build_dependencies.sh
 
       - name: Download A04s Firmware (Direct Link)
-       run: |
+        run: |
          source ./buildenv.sh a04s
-         ./scripts/download_fw.sh SM-A047F TUR
+         ./scripts/download_fw.sh
     
 
       - name: Extract A04s Firmware
