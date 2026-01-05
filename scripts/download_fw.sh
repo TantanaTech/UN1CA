@@ -41,20 +41,20 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
+# ODIN_PATH'in doğru olduğundan emin olalım
 ODIN_PATH="$ODIN_DIR/${MODEL}_${CSC}"
 mkdir -p "$ODIN_PATH"
 
+# Dosya ismini extract_fw'nin aradığı isim yapalım
 ZIP_FILE="$ODIN_PATH/firmware.zip"
-
-# -----------------------------
-# Skip if exists
-# -----------------------------
+# SKİP İF EXİSTİNT
 if ! $FORCE && [ -f "$ODIN_PATH/.downloaded" ]; then
     echo "! Firmware already downloaded"
     exit 0
 fi
 
 echo "- Downloading firmware..."
+# Dosyayı direkt ZIP_FILE olarak kaydediyoruz
 wget -q --show-progress "$DOWNLOAD_URL" -O "$ZIP_FILE"
 
 if [ ! -f "$ZIP_FILE" ]; then
@@ -62,13 +62,9 @@ if [ ! -f "$ZIP_FILE" ]; then
     exit 1
 fi
 
-echo "- Extracting..."
-unzip -o "$ZIP_FILE" -d "$ODIN_PATH"
-rm -f "$ZIP_FILE"
+# ÖNEMLİ: unzip işlemini burada yapmıyoruz, extract_fw.sh zaten yapıyor.
+# Sadece .downloaded dosyasını oluşturuyoruz.
+echo "A047FXXSCEYI1/A047FXXSCEYI1/A047FXXSCEYI1/A047FXXSCEYI1" > "$ODIN_PATH/.downloaded"
 
-echo "OK" > "$ODIN_PATH/.downloaded"
-
-echo "✔ Firmware downloaded and ready:"
-echo "  $ODIN_PATH"
-
+echo "✔ Firmware downloaded and ready for extraction."
 exit 0
