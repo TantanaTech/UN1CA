@@ -62,7 +62,7 @@ jobs:
       - name: Extract A04s Firmware
         run: |
           source ./buildenv.sh a04s
-          ./scripts/extract_fw.sh
+          ./scripts/extract_fw.sh "SM-A047F" "TUR"
 
       - name: Build ROM
         run: |
