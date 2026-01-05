@@ -35,5 +35,19 @@ EXTRACT_FILE_FROM_TAR "$AP_TAR" "vendor.img" "$FW_PATH"
 EXTRACT_FILE_FROM_TAR "$AP_TAR" "boot.img" "$FW_PATH"
 EXTRACT_FILE_FROM_TAR "$BL_TAR" "vbmeta.img" "$FW_PATH"
 
+# Eğer dosyalar system/system içindeyse, yukarı taşı
+if [ -d "$FW_PATH/system/system" ]; then
+    echo "-> Fixing double system directory structure..."
+    mv "$FW_PATH/system/system/"* "$FW_PATH/system/"
+    rm -rf "$FW_PATH/system/system"
+fi
+
+# Vendor için de aynısını kontrol edelim
+if [ -d "$FW_PATH/vendor/vendor" ]; then
+    echo "-> Fixing double vendor directory structure..."
+    mv "$FW_PATH/vendor/vendor/"* "$FW_PATH/vendor/"
+    rm -rf "$FW_PATH/vendor/vendor"
+fi
+
 touch "$FW_PATH/.extracted"
 echo ">> Extraction complete!"
