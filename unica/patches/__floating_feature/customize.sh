@@ -1,3 +1,4 @@
+# bizim hata yaşadığımız floating featire dosyası
 # UN1CA floating_feature patch
 # - Add deprecated features in the $DEPRECATED variable
 # - Add features to ignore in the $BLACKLIST variable
@@ -125,12 +126,19 @@ SEC_FLOATING_FEATURE_SAIV_CONFIG_ARDOODLE_LIB=IMG_PICKING
 "
 
 # [
+# customize.sh içindeki APPLY_TARGET_FEATURE fonksiyonunu bul ve yolları şöyle değiştir:
+
 APPLY_TARGET_FEATURE()
 {
-    local TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"
+    # Klasör ismini senin sabitlediğin yapıya göre veriyoruz
+    local TARGET_FIRMWARE_PATH="SM-A047F_TUR"
 
-    local SOURCE_FILE="$WORK_DIR/system/system/etc/floating_feature.xml"
-    local TARGET_FILE="$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/floating_feature.xml"
+    # Yolları system/system yerine system/etc olarak güncelliyoruz
+    local SOURCE_FILE="$WORK_DIR/system/etc/floating_feature.xml"
+    local TARGET_FILE="$FW_DIR/$TARGET_FIRMWARE_PATH/system/etc/floating_feature.xml"
+
+    # ... (Geri kalan işlemler aynı kalsın) ...
+
 
     local FEATURE
     local SOURCE_VALUE
