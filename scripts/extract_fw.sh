@@ -13,9 +13,9 @@ echo ">> Extracting Firmware for $MODEL ($CSC)..."
 mkdir -p "$FW_PATH"
 
 # 2. Zip Dosyasını Aç
-ZIP_FILE="$ODIN_PATH/firmware.zip"
+ZIP_FILE="$ODIN_PATH/A047F_Firmware.zip"
 if [ ! -f "$ZIP_FILE" ]; then
-    echo "!! HATA: firmware.zip bulunamadı! Yol: $ZIP_FILE"
+    echo "!! HATA: A047F_Firmware.zip bulunamadı! Yol: $ZIP_FILE"
     exit 1
 fi
 
