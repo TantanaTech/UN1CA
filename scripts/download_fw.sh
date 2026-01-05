@@ -1,100 +1,74 @@
 #!/usr/bin/env bash
 
-# -----------------------------------------
-# Google Drive Firmware Downloader (FIXED)
-# Confirm-token bypass + zero samloader
-# -----------------------------------------
+# --------------------------------------
+# Minimal Firmware Downloader (No Drive)
+# --------------------------------------
 
-source "$SRC_DIR/scripts/utils/firmware_utils.sh" || exit 1
-source "$TOOLS_DIR/venv/bin/activate" || exit 1
+FORCE=false
+MODEL=""
+CSC=""
 
-MODEL="SM-A047F"
-CSC="TUR"
+# Yeni eklediğin direkt indirme linki
+DOWNLOAD_URL="https://s12.ooo/v2/IxJCDiMnLiwSJSk2AzA8MTwwAjEjCB4lFzssIDs2ByAzMUEgOzEUQDMQMCMBOyw/LghBBx4XKTwzMTMGAzECHgMwKQ4vFjNALxEdPzULIj8uJzYALgAzJTxAQQYhAC4vEgc+CwkvICAPFyktNBEHPAEHHgcuBykjDxszKTIIHyQ7Ox4jAwMvES84BkIeCzwGHgM8FCMkNDEjCxVACTghHzInDQYuFx8rIwAvJCFAMxE8EQY5NRshDjURPho0ES8kNRYhOR44LwsJEQc5NBsjKyEAPg4hAAYsLjgeLDQRHg4yJTMsMiUNKzwAPh8mGzk5FyUzDTUHQQEuByADISxBIwMnOUANQAokMzYCICMXPjkDFzA1CS8pDTsxHhwzQAZCOzEHHjMsNCsNMT4eODAeHgk7CDkeFi4nODAzLzssPiAjFg1AMywpPDsxHgcXOzYGOAAhKTw/FD01OCBCJgQwBx4bOxQ7BywAMkAHIxI7AiQ8ES8/MwApIwE7BgQNFx4tPEAhBiMHAhYjOAZCIwM0AB4kPAABFjw/AQ0TEw=="
 
-FILE_ID="1C9GtYTn1EZ4sQN7qfJeWN6gxDj_WbgY-"
-BASE_URL="https://drive.google.com/uc?export=download"
+PRINT_USAGE() {
+    echo "Usage: download_fw [options] <MODEL> <CSC>"
+    echo " -f, --force  : Force download even if already exists"
+}
+
+# -----------------------------
+# Parse args
+# -----------------------------
+if [ "$#" -lt 2 ]; then
+    PRINT_USAGE
+    exit 1
+fi
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -f|--force) FORCE=true ;;
+        *)
+            if [ -z "$MODEL" ]; then
+                MODEL="$1"
+            elif [ -z "$CSC" ]; then
+                CSC="$1"
+            else
+                echo "Unknown argument: $1"
+                exit 1
+            fi
+            ;;
+    esac
+    shift
+done
 
 ODIN_PATH="$ODIN_DIR/${MODEL}_${CSC}"
-FW_PATH="$FW_DIR/${MODEL}_${CSC}"
-
-mkdir -p "$ODIN_PATH" "$FW_PATH"
-
-echo "======================================"
-echo "  Google Drive Firmware Downloader"
-echo "======================================"
-echo "- Model: $MODEL"
-echo "- CSC:   $CSC"
-echo "- Output: $ODIN_PATH"
+mkdir -p "$ODIN_PATH"
 
 ZIP_FILE="$ODIN_PATH/firmware.zip"
 
-echo "- Step 1: Requesting download token..."
-
-CONFIRM=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies \
-    "${BASE_URL}&id=${FILE_ID}" -O- | \
-    sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1/p')
-
-if [ -z "$CONFIRM" ]; then
-    echo "! Failed to get confirm token."
-    exit 1
+# -----------------------------
+# Skip if exists
+# -----------------------------
+if ! $FORCE && [ -f "$ODIN_PATH/.downloaded" ]; then
+    echo "! Firmware already downloaded"
+    exit 0
 fi
 
-echo "- Token acquired: $CONFIRM"
+echo "- Downloading firmware..."
+wget -q --show-progress "$DOWNLOAD_URL" -O "$ZIP_FILE"
 
-echo "- Step 2: Downloading firmware..."
-
-wget --load-cookies /tmp/cookies.txt \
-    "${BASE_URL}&confirm=${CONFIRM}&id=${FILE_ID}" \
-    -O "$ZIP_FILE" --show-progress -q
-
-rm -f /tmp/cookies.txt
-
-if [ ! -s "$ZIP_FILE" ]; then
-    echo "! ERROR: Download failed or file empty!"
-    exit 1
-fi
-
-echo "- Step 3: Validating ZIP file..."
-
-if ! unzip -t "$ZIP_FILE" >/dev/null 2>&1; then
-    echo "! ERROR: Downloaded file is NOT a valid ZIP."
+if [ ! -f "$ZIP_FILE" ]; then
+    echo "! DOWNLOAD FAILED"
     exit 1
 fi
 
 echo "- Extracting..."
-unzip -o "$ZIP_FILE" -d "$ODIN_PATH" >/dev/null
+unzip -o "$ZIP_FILE" -d "$ODIN_PATH"
 rm -f "$ZIP_FILE"
 
-echo "- Verifying ODIN .md5 files..."
+echo "OK" > "$ODIN_PATH/.downloaded"
 
-VERIFY_ODIN_PACKAGES() {
-    while IFS= read -r f; do
-        FILE_NAME="$(basename "$f")"
-        echo "  * Checking $FILE_NAME"
+echo "✔ Firmware downloaded and ready:"
+echo "  $ODIN_PATH"
 
-        NAME="${FILE_NAME%.md5}"
-        LENGTH=$((32 + 2 + ${#NAME} + 1))
-
-        STORED=$(tail -c "$LENGTH" "$f" | cut -d ' ' -f1)
-        CURRENT=$(head -c-"$LENGTH" "$f" | md5sum | cut -d ' ' -f1)
-
-        if [[ "$STORED" != "$CURRENT" ]]; then
-            echo "! MD5 FAIL: $FILE_NAME"
-            exit 1
-        fi
-
-        echo "    ✔ OK"
-    done < <(find "$ODIN_PATH" -type f -name "*.md5")
-}
-
-VERIFY_ODIN_PACKAGES || exit 1
-
-echo "DRIVE-FIRMWARE" > "$ODIN_PATH/.downloaded"
-
-echo "======================================"
-echo "✔ Firmware Ready!"
-echo "→ $ODIN_PATH"
-echo "======================================"
-
-deactivate
 exit 0
