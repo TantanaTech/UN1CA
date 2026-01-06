@@ -19,13 +19,13 @@ body:
   - type: input
     attributes:
       label: "Device name:"
-      placeholder: Galaxy A52s 5G
+      placeholder: Galaxy A04s 4G
     validations:
       required: true
   - type: input
     attributes:
       label: "Device model number:"
-      placeholder: SM-A528B
+      placeholder: SM-A047F
     validations:
       required: true
   - type: textarea
