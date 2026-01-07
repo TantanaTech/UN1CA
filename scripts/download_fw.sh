@@ -2,7 +2,8 @@
 set -e
 
 # === CONFIG ===
-FILE_ID="1C9GtYTn1EZ4sQN7qfJeWN6gxDj_WbgY-"
+# Yeni paylaştığın çalışan link ID'si
+FILE_ID="13g7bs8VnOPeOc8gUnnOBINSp5ekzAUvb"
 MODEL="SM-A047F"
 CSC="TUR"
 # Unica'nın standart ODIN_DIR yolunu kullanıyoruz
@@ -19,6 +20,9 @@ if ! command -v gdown >/dev/null 2>&1; then
 fi
 
 echo "Downloading firmware directly to $ODIN_PATH..."
+
+# Yeni ID ile indirme denemesi. 
+# --proxy veya --fuzzy gibi parametreler eklemiyoruz, gdown genellikle --id ile daha stabil çalışır.
 gdown --id "$FILE_ID" -O "$OUTNAME"
 
 if [ ! -f "$OUTNAME" ]; then
