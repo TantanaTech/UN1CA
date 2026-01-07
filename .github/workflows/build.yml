@@ -68,4 +68,12 @@ jobs:
         run: |
           source ./buildenv.sh a04s
           ./scripts/make_rom.sh --no-rom-zip
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UN1CA-A04s-OneUI7
+          path: out/*.zip  # Eğer zip oluşturuyorsan
+          # path: out/*.img # Eğer sadece imajları istiyorsan
+          
           
