@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# UN1CA A04s One UI 7 Optimized Build Script
-
 source "$SRC_DIR/scripts/utils/build_utils.sh" || exit 1
 
 FORCE=false
 BUILD_ROM=false
 BUILD_ZIP=true
 
-# A04s ve TUR kodlarını zorla tanımlıyoruz ki "/" hatası olmasın
-SOURCE_FIRMWARE="SM-A047F/TUR"
-TARGET_FIRMWARE="SM-A047F/TUR"
-TARGET_CODENAME="a04s"
+# --- A04s İÇİN SABİTLENMİŞ YOLLAR ---
+SOURCE_FIRMWARE_PATH="SM-A047F_TUR"
+TARGET_FIRMWARE_PATH="SM-A047F_TUR"
+# ------------------------------------
 
 START_TIME="$(date +%s)"
+# ... (dosyanın geri kalanı aynı kalsın)
 
 # Dosya yollarını temizliyoruz
 SOURCE_FIRMWARE_PATH="SM-A047F_TUR"
