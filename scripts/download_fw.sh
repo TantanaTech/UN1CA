@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# Manuel olarak yolları tanımlıyoruz
 ODIN_PATH="out/odin/SM-A047F_TUR"
 OUTNAME="$ODIN_PATH/A047F_Firmware.zip"
 
@@ -12,11 +11,12 @@ if ! command -v gdown >/dev/null 2>&1; then
     pip install gdown
 fi
 
-# Firmware'i doğru klasöre indir
+# ÖNEMLİ: link.txt dosyasındaki doğru ID buraya eklendi (1K_-v9tc...)
 if [ ! -f "$OUTNAME" ]; then
-    gdown --id "1C9GtYTn1EZ4sQN7qfJeWN6gxDj_WbgY-" -O "$OUTNAME"
+    echo "-> Firmware indiriliyor..."
+    gdown --id "1K_-v9tcg-aQDKWfG0Isl0Ee4YCCxYVWT" -O "$OUTNAME" --fuzzy
 fi
 
-# make_rom.sh'ın indirme bittiğini anlaması için bu dosya ŞART
+# Bu dosya, extract_fw.sh scriptinin başlamasını sağlar
 echo "A047FXXSCEYI1" > "$ODIN_PATH/.downloaded"
-echo "Dosya hazır: $OUTNAME"
+echo "İndirme başarılı: $OUTNAME"
