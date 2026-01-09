@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 source "$SRC_DIR/scripts/utils/build_utils.sh" || exit 1
+# build_flashable_zip.sh içine ekle:
+if [ ! -f "$WORK_DIR/system.img" ]; then
+    echo "!! KRİTİK HATA: system.img bulunamadı! Ayıklama (extract) başarısız oldu"
+    exit 1
+fi
 
 # A04s İçin Sabit Değerler (Hata almamak için)
 TARGET_SUPER_PARTITION_SIZE=9126805504 # Yaklaşık 8.5GB
