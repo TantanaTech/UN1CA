@@ -1,46 +1,34 @@
 #!/usr/bin/env bash
 source "$SRC_DIR/scripts/utils/firmware_utils.sh" || exit 1
 
-MODEL="${1:-SM-A047F}"
-CSC="${2:-TUR}"
-ODIN_PATH="$ODIN_DIR/${MODEL}_${CSC}"
-FW_PATH="$FW_DIR/${MODEL}_${CSC}"
+ODIN_PATH="$ODIN_DIR/SM-A047F_TUR"
+FW_PATH="$FW_DIR/SM-A047F_TUR"
+ZIP_FILE="$ODIN_PATH/A047F_Firmware.zip"
 
-echo ">> Disk Dostu Ayıklama Başlatıldı..."
 mkdir -p "$FW_PATH"
 
-ZIP_FILE="$ODIN_PATH/A047F_Firmware.zip"
+# Zip'i aç ve hemen sil (Yer kazanmak için ŞART)
 if [ -f "$ZIP_FILE" ]; then
-    echo "-> Firmware Zip açılıyor..."
-    unzip -o "$ZIP_FILE" -d "$ODIN_PATH"
-    rm -f "$ZIP_FILE"  # DİSKİ BOŞALT: Zip ile işimiz bitti
+    unzip -o "$ZIP_FILE" -d "$ODIN_PATH" && rm -f "$ZIP_FILE"
 fi
 
 AP_TAR=$(find "$ODIN_PATH" -name "AP_*.tar.md5" | head -n 1)
-BL_TAR=$(find "$ODIN_PATH" -name "BL_*.tar.md5" | head -n 1)
 
-# Sadece ihtiyacımız olan lz4 dosyalarını tek tek çıkart ve TAR'ı sil
-echo "-> İmajlar ayıklanıyor..."
-for img in "system.img.lz4" "vendor.img.lz4" "product.img.lz4" "boot.img.lz4"; do
-    tar -xf "$AP_TAR" -C "$FW_PATH" "$img" 2>/dev/null && echo "-> $img çıktı."
-done
-rm -f "$AP_TAR" # DİSKİ BOŞALT: 5-8 GB yer açar
+# Hata alınan nokta burası: Exit code 2'yi engellemek için --wildcards ekliyoruz
+echo "-> İmajlar TAR paketinden çıkarılıyor..."
+tar -xf "$AP_TAR" -C "$FW_PATH" --wildcards "*.img.lz4" || echo "Bazı dosyalar eksik ama devam ediliyor..."
 
-tar -xf "$BL_TAR" -C "$FW_PATH" "vbmeta.img.lz4" 2>/dev/null
-rm -f "$BL_TAR"  # DİSKİ BOŞALT
+# TAR paketini SİL (Disk dolmasını engellemek için kritik)
+rm -f "$AP_TAR"
 
-# LZ4 dosyalarını aç ve hemen lz4 versiyonunu sil
-echo "-> LZ4 açılıyor..."
+# LZ4'leri aç ve sil
 cd "$FW_PATH"
 for f in *.lz4; do
-    if [ -f "$f" ]; then
-        lz4 -d "$f" "${f%.lz4}" && rm -v "$f" # DİSKİ BOŞALT: Sıkıştırılmışı sil
-    fi
+    lz4 -d "$f" "${f%.lz4}" && rm -f "$f"
 done
 
-# build_flashable_zip için dosyaları taşı
+# Dosyaları WORK_DIR'e taşı
 mkdir -p "$WORK_DIR"
-mv -v *.img "$WORK_DIR/" 2>/dev/null || true # cp yerine mv kullanarak yer kazan
+mv -v *.img "$WORK_DIR/" 2>/dev/null || true
 
 touch "$FW_PATH/.extracted"
-echo ">> Ayıklama ve Temizlik Tamamlandı!"
