@@ -1,34 +1,33 @@
 #!/usr/bin/env bash
 source "$SRC_DIR/scripts/utils/firmware_utils.sh" || exit 1
 
+# Klasör yollarını loglara yazdırarak kontrol edelim
 ODIN_PATH="$ODIN_DIR/SM-A047F_TUR"
 FW_PATH="$FW_DIR/SM-A047F_TUR"
-ZIP_FILE="$ODIN_PATH/A047F_Firmware.zip"
 
-mkdir -p "$FW_PATH"
+echo ">> Arama yolu: $ODIN_PATH"
+ls -R "$ODIN_PATH" # İçeride ne var logda görelim
 
-# Zip'i aç ve hemen sil (Yer kazanmak için ŞART)
-if [ -f "$ZIP_FILE" ]; then
-    unzip -o "$ZIP_FILE" -d "$ODIN_PATH" && rm -f "$ZIP_FILE"
-fi
-
+# AP paketini daha geniş bir arama ile bulalım
 AP_TAR=$(find "$ODIN_PATH" -name "AP_*.tar.md5" | head -n 1)
 
-# Hata alınan nokta burası: Exit code 2'yi engellemek için --wildcards ekliyoruz
-echo "-> İmajlar TAR paketinden çıkarılıyor..."
-tar -xf "$AP_TAR" -C "$FW_PATH" --wildcards "*.img.lz4" || echo "Bazı dosyalar eksik ama devam ediliyor..."
+if [ -z "$AP_TAR" ]; then
+    echo "!! HATA: AP Tar paketi bulunamadı. İndirme adımı başarısız olmuş olabilir."
+    exit 1
+fi
 
-# TAR paketini SİL (Disk dolmasını engellemek için kritik)
-rm -f "$AP_TAR"
+echo "-> Bulunan Paket: $AP_TAR"
+echo "-> İmajlar çıkarılıyor..."
 
-# LZ4'leri aç ve sil
+# Dosyayı doğrudan çıkartalım
+tar -xf "$AP_TAR" -C "$FW_PATH" --wildcards "*.img.lz4" || { echo "Tar başarısız"; exit 1; }
+
+# LZ4'leri imaja çevir
 cd "$FW_PATH"
 for f in *.lz4; do
     lz4 -d "$f" "${f%.lz4}" && rm -f "$f"
 done
 
-# Dosyaları WORK_DIR'e taşı
+# Dosyaları WORK_DIR'e TAŞI
 mkdir -p "$WORK_DIR"
-mv -v *.img "$WORK_DIR/" 2>/dev/null || true
-
-touch "$FW_PATH/.extracted"
+mv -v *.img "$WORK_DIR/"
