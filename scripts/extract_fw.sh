@@ -5,39 +5,45 @@ ODIN_PATH="out/odin/SM-A047F_TUR"
 FW_PATH="out/firmware/SM-A047F_TUR"
 WORK_DIR="out/target/a04s/work_dir"
 
-# ÖNEMLİ: Eğer dosyalar zaten taşınmışsa, hata vermeden bitir
-if [ -f "$WORK_DIR/system.img" ] || [ -f "$WORK_DIR/super.img" ]; then
-    echo ">> Dosyalar zaten ayıklanmış ve hazır. İşlem atlanıyor."
+echo ">> Kontrol Başlatıldı..."
+mkdir -p "$FW_PATH" "$WORK_DIR"
+
+# 1. ADIM: Eğer imajlar zaten WORK_DIR içindeyse işlemi atla (Hız kazandırır)
+if [ -f "$WORK_DIR/system.img" ]; then
+    echo ">> Dosyalar zaten hazır, ayıklama atlanıyor."
     exit 0
 fi
 
-echo ">> Ayıklama Başlatılıyor..."
-mkdir -p "$FW_PATH" "$WORK_DIR"
+# 2. ADIM: ZIP dosyasını bul ve mutlaka AÇ
+ZIP_FILE=$(find "$ODIN_PATH" -name "*.zip" | head -n 1)
+if [ -f "$ZIP_FILE" ]; then
+    echo "-> ZIP bulundu, açılıyor: $ZIP_FILE"
+    unzip -o "$ZIP_FILE" -d "$ODIN_PATH"
+    # DİSK YERİ İÇİN: ZIP'i açtıktan sonra silebilirsin ama önce açıldığından emin olmalısın
+fi
 
-# AP Paketini Bul
+# 3. ADIM: AP paketini şimdi ara (Açıldıktan sonra burada olmalı)
 AP_TAR=$(find "$ODIN_PATH" -name "AP_*.tar.md5" | head -n 1)
 
 if [ -z "$AP_TAR" ]; then
-    # Eğer AP yoksa ama zaten ayıklanmışsa yukarıdaki kontrol sayesinde buraya düşmez.
-    # Buraya düşüyorsa gerçekten bir sorun vardır.
-    echo "!! HATA: AP Tar paketi bulunamadı!"
+    echo "!! HATA: AP paketi hala bulunamadı. ZIP içeriği hatalı olabilir."
     ls -R "$ODIN_PATH"
     exit 1
 fi
 
-# İmajları Çıkar
-tar -xf "$AP_TAR" -C "$FW_PATH" --wildcards "*.img.lz4"
+echo "-> AP Paketi işleniyor: $AP_TAR"
 
-# LZ4'leri Aç ve Sil
+# 4. ADIM: İmajları çıkar ve lz4'ten kurtar
+tar -xf "$AP_TAR" -C "$FW_PATH" --wildcards "*.img.lz4"
 cd "$FW_PATH"
 for f in *.lz4; do
     lz4 -d "$f" "${f%.lz4}" && rm -f "$f"
 done
 
-# Dosyaları Taşı ve Kaynağı Temizle
+# 5. ADIM: Dosyaları taşı ve temizle
 cd - > /dev/null
 mv -v "$FW_PATH"/*.img "$WORK_DIR/"
-rm -f "$AP_TAR" # Sadece taşıma başarılı olduktan sonra siler
+rm -f "$AP_TAR" # Yer açmak için silebilirsin
 
 touch "$FW_PATH/.extracted"
-echo ">> İşlem Tamam!"
+echo ">> İşlem Başarıyla Tamamlandı!"
