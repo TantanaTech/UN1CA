@@ -14,7 +14,7 @@ fi
 # ÖNEMLİ: link.txt dosyasındaki doğru ID buraya eklendi (1K_-v9tc...)
 if [ ! -f "$OUTNAME" ]; then
     echo "-> Firmware indiriliyor..."
-    gdown "1K_-v9tcg-aQDKWfG0Isl0Ee4YCCxYVWT" -O "$OUTNAME" --fuzzy
+    gdown "1K_-v9tcg-aQDKWfG0Isl0Ee4YCCxYVWT" -O "$OUTNAME"
 fi
 
 # Bu dosya, extract_fw.sh scriptinin başlamasını sağlar
