@@ -64,12 +64,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
-          
-      - name: Fix gdown version for legacy scripts
-        run: |
-          pip install --upgrade pip
-          pip install gdown==4.7.1
-
+     
       - name: Build dependencies
         run: |
           source ./buildenv.sh a04s
